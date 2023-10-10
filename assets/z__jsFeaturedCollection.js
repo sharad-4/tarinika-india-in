@@ -33,7 +33,7 @@ window.PXUTheme.jsFeaturedCollection = {
       freeScroll: true,
       imagesLoaded: true,
       draggable: true,
-      cellAlign: 'left',
+      cellAlign: 'center',
       wrapAround: slideData.wrapAround,
       pageDots: false,
       contain: true,
