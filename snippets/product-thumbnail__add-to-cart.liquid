@@ -1,0 +1,183 @@
+{% assign collection_handles = product.collections | map: 'handle' %}
+{% assign variant = product.selected_or_first_available_variant %}
+{% capture thumbnail_paths_alts %}{% if product.media %}{% for media in product.media %}{{ media | img_url: "master" }}^{{ media.media_type | escape }}^{{ media.id }}^{{ media.width }}{% unless forloop.last %}~{% endunless %}{% endfor %}{% else %}{% for image in product.images %}{{ image | img_url: "master" }}^{{ image.alt | escape }}^{{ image.id }}^{{ image.width }}{% unless forloop.last %}~{% endunless %}{% endfor %}{% endif %}{% endcapture %}
+{% capture image_paths_alts %}{% if product.media %}{{ product_media_loop }}{% else %}{% for image in product.images %}{{ image | img_url: "master" }}^{{ image.alt | escape }}^{{ image.id }}^{{ image.width }}{% unless forloop.last %}~{% endunless %}{% endfor %}{% endif %}{% endcapture %}
+
+<style>
+  .product-image__wrapper:hover .thumbnail-overlay__container {
+    justify-content: center;
+  }
+  .thumbnail-overlay__container .add-to-cart__buttons {
+    padding-top: 0;
+  }
+  .add_to_cart:hover {
+    color: white;
+    background-color: black;
+  }
+/*   #add-to-cart_product {
+    padding-bottom: 10px;
+  } */
+/*   .quick-shop__buttons {
+    padding-top: 10px;
+  } */
+
+  #contentWrapper_Modal {
+    display: none;
+    position: fixed;
+    z-index: 2147483647;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,.4);
+  }
+  .contentWrapper_alert {
+    top: 2%;
+/*     background: rgb(163, 210, 212); */
+    background: #fff;
+    gradient_left: rgb(255, 0, 0);
+    gradient_right: rgb(0, 0, 255);
+    width: 30%;
+    height: 10%;
+/*     border-color: rgb(86, 130, 133); */
+    border-color: rgb(163, 210, 212);
+/*     border-width: 2px; */
+    border-width: 7px;
+/*     border-radius: 6px; */
+    padding: 0px;
+    position: relative;
+    margin: auto;
+    border-style: solid;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,.2),0 6px 20px 0 rgba(0,0,0,.19);
+  }
+  .contentWrapper_animation {
+    -webkit-animation-name: cz-animatetop1;
+    -webkit-animation-duration: 0.4s;
+    animation-name: cz-animatetop1;
+    animation-duration: 0.4s;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+  #dismiss_alert {
+    display: flex;
+  }
+  #contentWrapper_dismiss_alert {
+    font-weight: 700;
+    font-size: 27px;
+    top: 0;
+    right: 0;
+    border-radius: 7px;
+    position: absolute;
+    cursor: pointer;
+    display: block;
+    overflow: visible;
+    width: 30px;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    -webkit-transition: color .2s;
+    transition: color .2s;
+    text-decoration: none;
+    color: #95979c;
+    border: 0;
+    outline: 0;
+    background: 0 0;
+    text-align: center;
+  }
+  .contentWrapper__modal-body {
+    font-size: 17px;
+    text-align: center;
+    display: flex;
+    height: 100%;
+  }
+  .contentWrapper__modal-body-text {
+    margin: auto;
+    margin-left: 10px;
+  }
+  {% if thumbnail %}
+    #add-to-cart_product {
+      z-index: 11;
+    }
+  {% endif %}
+</style>
+
+{% if thumbnail %}
+  {%
+    render 'product-thumbnail__quick-shop-button-new',
+    product: product,
+    thumbnail: 'thumbnail'
+  %}
+{% else %}
+  {%
+    render 'product-thumbnail__quick-shop-button-new',
+    product: product
+  %}
+{% endif %}
+
+<div id="add-to-cart_product" class="add-to-cart__buttons animated fadeInUp" onclick="addProductsInCart(event)">
+  <svg class="add_to_cart button action_button js-add-to-cart-link" inventory="{{ product.variants[0].inventory_quantity }}" variant-id="{{ product.variants[0].id }}" data-id="{{ product.id }}" data-url="{{ product.url }}" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M10.6668 5.99992V3.99992C10.6668 2.52716 9.47292 1.33325 8.00017 1.33325C6.52741 1.33325 5.3335 2.52716 5.3335 3.99992V5.99992M2.39483 6.90123L1.99483 11.1679C1.8811 12.381 1.82424 12.9876 2.02553 13.4561C2.20236 13.8677 2.51224 14.208 2.90551 14.4224C3.35318 14.6666 3.96241 14.6666 5.18086 14.6666H10.8195C12.0379 14.6666 12.6471 14.6666 13.0948 14.4224C13.4881 14.208 13.798 13.8677 13.9748 13.4561C14.1761 12.9876 14.1192 12.381 14.0055 11.1679L13.6055 6.90123C13.5095 5.87682 13.4614 5.36461 13.2311 4.97736C13.0282 4.63631 12.7284 4.36333 12.3699 4.19315C11.9628 3.99992 11.4484 3.99992 10.4195 3.99992L5.58086 3.99992C4.55196 3.99992 4.03751 3.99992 3.63044 4.19315C3.27194 4.36332 2.97217 4.63631 2.76927 4.97736C2.53889 5.36461 2.49087 5.87682 2.39483 6.90123Z" stroke="#312E2E" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</div>
+
+<script>
+  // document.getElementById("add-to-cart_product").onclick = function(event) {addProductsInCart(event)};
+  function addProductsInCart(event) {
+    event.preventDefault()
+    document.getElementById("contentWrapper_Modal").style.display = "block"
+    // document.getElementById("open-product-detail").setAttribute('href', "");
+    var data = event.target
+
+    var product_inventory = data.attributes[1].value
+    var product_variant_id = data.attributes[2].value
+    var properties = {
+      "_variant-status": "out-of-stock",
+      "Status": "Ships in 7-10 business days"
+    }
+    // if (product_inventory > 0) {
+    //     properties = {
+    //         "_variant-status": "in-stock",
+    //         "Status": "Ready to Ship"
+    //     }
+    // } else {
+    //     properties = {
+    //         "_variant-status": "out-of-stock",
+    //         "Status": "Ships in 7-10 business days"
+    //     }
+    // }
+    $.ajax({
+        type: 'POST',
+        url: '/cart/add.js',
+        data: {
+          quantity: 1,
+          id: product_variant_id,
+          properties: properties
+        },
+        dataType: 'json',
+        success: function(data) {
+          // alert("Product has been added in cart.")
+          document.getElementById("contentWrapper_Modal").style.display = "block"
+
+          setTimeout(()=>{
+            document.getElementById("contentWrapper_Modal").style.display = "none"
+          }, 3000);
+          
+        }
+    })
+  }
+    setTimeout(()=>{
+      closeModal()
+    }, 3000);
+  function closeModal() {
+    // event.preventDefault()
+    document.getElementById("contentWrapper_Modal").style.display = "none"
+  }
+
+  // document.getElementById("contentWrapper_dismiss_alert").addEventListener("click", function() {
+  //   document.getElementById("contentWrapper_Modal").style.display = "none"
+  // });
+  
+</script>
